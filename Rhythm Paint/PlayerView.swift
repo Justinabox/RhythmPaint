@@ -295,7 +295,16 @@ struct PlayerView: View {
                         height: markerSize
                     )
                     context.fill(Path(ellipseIn: markerRect), with: .color(.accentColor))
-                    player.play(frequency: Float(valueToFrequency((screenHeight-currentHit) / screenHeight)), duration: timeDelta)
+                    
+                    // Map vertical position to normalized pitch value (0–1), then to frequency and haptic intensity
+                    let normalizedPitch = max(0.0, min(1.0, (screenHeight - currentHit) / screenHeight))
+                    let frequency = valueToFrequency(normalizedPitch)
+                    
+                    player.play(frequency: Float(frequency), duration: timeDelta)
+                    
+                    let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+                    impactGenerator.prepare()
+                    impactGenerator.impactOccurred(intensity: CGFloat(1 - normalizedPitch))
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
